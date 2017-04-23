@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Hello, data!</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.2/d3.min.js"></script>
+        <script
+		  src="https://code.jquery.com/jquery-3.2.1.min.js"
+		  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+		  crossorigin="anonymous"></script>
+
+        <style>
+            .urlRepo p, .urlRepo i {display: inline-block;}
+            .urlRepo i {margin-right: 15px;}
+        </style>
+    </head>
+    <body>
+    	<div id='repoList'>
+        <form name="myform" onSubmit="return handleClick()">
+            <input name="Submit"  type="submit" value="Add Repository" />
+            <input type="text" id="myVal" style="width:80%"/>
+        </form>
+        </div>
+
+        </br>
+        <div id="authenticationDiv">
+        	<label>Authentication Token: </label>
+    		<input id='authToken' type="text" style="width: 76%" />
+        </div>
+
+        </br>
+        <div id="downloadDiv">
+		    <input name="updateButton" 
+		           type="button" 
+		           value="Download Issues" 
+		           onclick="gatherRepoList()" />
+		</div>
+ 
+        <script type="text/javascript" src="download.js"></script>
+ 
+    </body>
+</html>
