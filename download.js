@@ -2,10 +2,16 @@ var dataset = [];
 var issues = [];
   
 function handleClick(event){
-    console.log(document.getElementById("myVal").value)
-    draw(document.getElementById("myVal").value)
+	var url = document.getElementById("myVal").value;
+	url = cleanURL(url);
+    draw(url);
     return false;
 }
+
+function cleanURL(site)     
+{     
+    return site.replace(/\/$/, "");
+} 
 
 function draw(val){
     var urlDiv = d3.select("#repoList").append("div").classed('urlRepo',true);
@@ -44,7 +50,8 @@ function downloadIssues(repoList, token, i){
 	var j = i+1;
 
 	if(j>repoList.length){
-		console.log(issues);
+		issues = [].concat.apply([],issues);
+		prepareIssues(issues);
 		return;
 	}
 
@@ -58,9 +65,80 @@ function downloadIssues(repoList, token, i){
 	    console.log(response);
 	    issues.push(response);
 	    downloadIssues(repoList, token, j);
+	}).fail(function (response){
+		console.log("Error: " + response.responseJSON.message);
+		downloadIssues(repoList, token, j);
 	});
 }
 
 function prepareIssues(){
-	//
+	var cleaned = [];
+	for (i = 0; i < issues.length; i++){
+		var issue = issues[i];
+
+		var closed = issue.closed_at == null ? "open" : issue.closed_at;
+		var milestone = issue.milestone == null ? "none" : issue.milestone;
+		
+		var assignee = issue.assignee == null ? "none" : issue.assignee.login;
+		var author = issue.user == null ? "none" :  issue.user.login;
+
+		var labels = [];
+		for (var l in issue.labels) { labels.push(issue.labels[l].name); }
+
+		var row = {
+			repository: issue.repository_url.substr(issue.repository_url.lastIndexOf('/') + 1),
+			issue_number: issue.number,
+			title: issue.title,
+			author: author,
+			status: issue.state,
+			body: issue.body,
+			assignee: assignee,
+			created: issue.created_at,
+			labels: labels,
+			milestone: milestone,
+			closed: closed,
+			link: issue.url
+		};
+
+		cleaned.push(row);
+    }
+
+    exportToCSV(cleaned);
+}
+
+
+var objectToCSVRow = function(dataObject) {
+    var dataArray = new Array;
+    for (var o in dataObject) {
+        var innerValue = dataObject[o]===null?'':dataObject[o].toString();
+        var result = innerValue.replace(/"/g, '""');
+        result = '"' + result + '"';
+        dataArray.push(result);
+    }
+    return dataArray.join(' ') + '\r\n';
+}
+
+var exportToCSV = function(arrayOfObjects) {
+
+    if (!arrayOfObjects.length) {
+        return;
+    }
+
+    var csvContent = "data:text/csv;charset=utf-8,";
+
+    // headers
+    csvContent += objectToCSVRow(Object.keys(arrayOfObjects[0]));
+
+    arrayOfObjects.forEach(function(item){
+        csvContent += objectToCSVRow(item);
+    }); 
+
+    var encodedUri = encodeURI(csvContent);
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "issues.csv");
+    document.body.appendChild(link); // Required for FF
+    link.click();
+    document.body.removeChild(link); 
+    issues = [];
 }
