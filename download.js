@@ -111,7 +111,7 @@ var objectToCSVRow = function(dataObject) {
     var dataArray = new Array;
     for (var o in dataObject) {
         var innerValue = dataObject[o]===null?'':dataObject[o].toString();
-        var result = innerValue.replace(/"/g, '""');
+        var result = innerValue.replace(/"/g, '""').replace(/(\r\n|\n|\r)/gm,"");
         result = '"' + result + '"';
         dataArray.push(result);
     }
